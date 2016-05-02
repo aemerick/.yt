@@ -1,3 +1,41 @@
+#from yt.fields.api import ValidateParameter
+import yt
+from yt import physical_constants as const
+import numpy as np
+
+
+def _jeans_length(field,data):
+ #   if data.has_field_parameter("Gamma"):
+  #      gamma = data.get_field_parameter('Gamma')
+   # else:
+    #    gamma = 1.6667
+
+    gamma = 1.6667
+    mu    = 1.3
+    T     = data['temperature'].convert_to_units('K')
+    c_s_squared = const.kboltz * gamma * T / (mu * const.mp)
+
+    L = c_s_squared * np.pi / const.G / data['density']
+
+    L = np.sqrt(L)
+
+    return L.convert_to_units('cm')
+
+yt.add_field('jeans_length', function=_jeans_length, units='cm', force_override=True)
+add_field(('all','jl'), function=_jeans_length, units='cm', force_override=True)
+
+
+# ---------------------------------------------------------------------------
+#
+# Fields for testing Enzo individual star SF scheme (A. Emerick)
+# as postprocessing step
+# ---------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------
+# Chemical species densities meant to me used with enzo data 
+#
+# ----------------------------------------------------------------------------
 def _CI_Density(field, data):
   dens = data[('enzo', 'CI_Density')].value
   dens = dens * data.ds.mass_unit / data.ds.length_unit**3
@@ -100,4 +138,4 @@ def _EuI_Density(field, data):
 
 add_field('EuI_Density_cgs', function=_EuI_Density, units='g/cm**3',
                         force_override = True)
-
+# ---------------------------------------------------------------------------
