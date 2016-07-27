@@ -1,5 +1,92 @@
+from yt import units as u
+import numpy as np
+from radiation import individual_star_properties as isp
+
+
+def _H_ionization_fraction(field,data):
+    return data['H_p1_number_density'] / (data['H_number_density'] + data['H_p1_number_density'])
+add_field(('gas','H_ionization_fraction'), function=_H_ionization_fraction, units='dimensionless')
+
+def _He_p1_ionization_fraction(field,data):
+    return data['He_p1_number_density'] / (data['He_number_density'] + data['He_p1_number_density'] + data['He_p2_number_density'])
+add_field(('gas','He_p1_ionization_fraction'), function=_He_p1_ionization_fraction, units='dimensionless')
+
+def _He_p2_ionization_fraction(field,data):
+    return data['He_p2_number_density'] / (data['He_number_density'] + data['He_p1_number_density'] + data['He_p2_number_density'])
+add_field(('gas','He_p2_ionization_fraction'), function=_He_p2_ionization_fraction, units='dimensionless')
+
+
+# define a efficiency parameter field here for FUV heating
+def _FUV_heating_efficiency(field,data):
+
+#    m = data[('all','birth_mass')].value
+#    Z = data[('all','metallicity_fraction')].value
+#    xp = data[('all','particle_position_x')].convert_to_units('cm').value
+#    yp = data[('all','particle_position_y')].convert_to_units('cm').value
+#    zp = data[('all','particle_position_z')].convert_to_units('cm').value
+
+#    m = m[0] 
+#    Z = Z[0]
+    xp = data.ds.domain_center[0].convert_to_units('cm')
+    yp = xp
+    zp = xp
+
+    m = 20.0
+    Z = 0.01
+    star = isp.individual_star( m, Z=Z)
+
+    L = star.FUV * 4.0 * np.pi * star._R**2
+    L = L * u.erg / u.s
+
+    rsqr = ( xp - data['x'])**2 +\
+           ( yp - data['y'])**2 +\
+           ( zp - data['z'])**2
+    rsqr = rsqr.convert_to_units('cm**2')
+
+
+    G = L / (4.0 * np.pi * rsqr) / 1.59E-3
+    G = G.value # should be unitless
+
+    T = data['temperature'].value
+    n_e = data['El_number_density'].convert_to_units('cm**(-3)').value
+
+    e = 4.92E-2 / ( 1.0 + 4.0E-3 * (G * T**(0.5) / n_e)**(0.73)) +\
+        3.7E-2 * (1.0E-4 * T)**(0.7) / (1.0 + 2.0E-4 * ((G * T**0.5)/n_e))
+
+    return e * data['temperature']/data['temperature'] # force dimensionless units
+
+add_field(('gas','fuv_efficiency'), function =_FUV_heating_efficiency, units='dimensionless')
+
+def _Pe_heating_total_rate(field, data):
+  gamma = (data[('gas','pe_heating_cgs')])
+                             
+  return (gamma / data[('gas','H_number_density')]).convert_to_units('erg/s')
+
+add_field(('gas','pe_total_rate'), function=_Pe_heating_total_rate, units='erg/s')
+
+
+def _Pe_heating(field, data):
+  gamma = data[('enzo','Pe_heating_rate')].value
+
+#  gamma = gamma * data.ds.mass_unit / data.ds.length_unit**3 * data.ds.velocity_unit**2 / data.ds.time_unit
+
+ # gamma = gamma.convert_to_units('erg/s/cm**3')
+    
+
+  return gamma * u.erg / u.s / u.cm**3
+
+add_field(('gas','pe_heating_cgs'), function = _Pe_heating, units='erg/s/cm**3')
+
 def _metal_fraction(field, data):
-  metal_dens = data[('enzo', 'Metal_Density')].value
+  try:
+      metal_dens = data[('enzo', 'Metal_Density')].value
+  except:
+      try:
+          metal_dens = data[('enzo', 'metallicity')].value
+      except:
+          metal_dens = data[('enzo', 'Metallicity')].value
+  
+
   metal_dens = metal_dens * data.ds.mass_unit / data.ds.length_unit**3
   metal_dens = metal_dens.convert_to_cgs()
 
