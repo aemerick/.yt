@@ -121,7 +121,17 @@ def _C_Fraction(field, data):
   return fraction
 add_field(('gas','C_Fraction'), function = _C_Fraction, units='dimensionless')
 
+def _C_Number_Density(field, data):
+    metal_dens = data[('enzo', 'C_Density')].value
+    metal_dens = metal_dens * data.ds.mass_unit / data.ds.length_unit**3
+    metal_dens = metal_dens.convert_to_cgs()
 
+    n = metal_dens / (12.0107 * u.amu)
+    n = n.convert_to_cgs()
+
+    return n
+add_field(('gas','C_Number_Density'), function = _C_Number_Density, units='cm**(-3)')
+	
 def _O_Fraction(field, data):
   metal_dens = data[('enzo', 'O_Density')].value
   metal_dens = metal_dens * data.ds.mass_unit / data.ds.length_unit**3
@@ -133,6 +143,18 @@ def _O_Fraction(field, data):
 
   return fraction
 add_field(('gas','O_Fraction'), function = _O_Fraction, units='dimensionless')
+
+def _O_Number_Density(field, data):
+    metal_dens = data[('enzo', 'O_Density')].value
+    metal_dens = metal_dens * data.ds.mass_unit / data.ds.length_unit**3
+    metal_dens = metal_dens.convert_to_cgs()
+
+    n = metal_dens / (15.9994 * u.amu)
+    n = n.convert_to_cgs()          
+
+    return n
+add_field(('gas','O_Number_Density'), function = _O_Number_Density, units='cm**(-3)')
+
 
 def _N_Fraction(field, data):
   metal_dens = data[('enzo', 'N_Density')].value
@@ -194,6 +216,17 @@ def _Fe_Fraction(field, data):
 
   return fraction
 add_field(('gas','Fe_Fraction'), function = _Fe_Fraction, units='dimensionless')
+
+def _Fe_Number_Density(field, data):
+    metal_dens = data[('enzo', 'Fe_Density')].value
+    metal_dens = metal_dens * data.ds.mass_unit / data.ds.length_unit**3
+    metal_dens = metal_dens.convert_to_cgs()
+
+    n = metal_dens / (55.845 * u.amu)
+    n = n.convert_to_cgs()
+
+    return n
+add_field(('gas','Fe_Number_Density'), function = _Fe_Number_Density, units='cm**(-3)')
 
 def _Ni_Fraction(field, data):
   metal_dens = data[('enzo', 'Ni_Density')].value
