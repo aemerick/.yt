@@ -1,6 +1,6 @@
 from yt import units as u 
 import numpy as np 
-from radiation import individual_star_properties as isp
+
 
 
 def _H_ionization_fraction(field,data):
@@ -17,7 +17,7 @@ add_field(('gas','He_p2_ionization_fraction'), function=_He_p2_ionization_fracti
 
 
 # define a efficiency parameter field here for FUV heating
-def _FUV_heating_efficiency(field,data):
+#def _FUV_heating_efficiency(field,data):
 
 #    m = data[('all','birth_mass')].value
 #    Z = data[('all','metallicity_fraction')].value
@@ -27,35 +27,35 @@ def _FUV_heating_efficiency(field,data):
 
 #    m = m[0] 
 #    Z = Z[0]
-    xp = data.ds.domain_center[0].convert_to_units('cm')
-    yp = xp
-    zp = xp
+#    xp = data.ds.domain_center[0].convert_to_units('cm')
+#    yp = xp
+#    zp = xp
 
-    m = 20.0
-    Z = 0.01
-    star = isp.individual_star( m, Z=Z)
+#    m = 20.0
+#    Z = 0.01
+#    star = isp.individual_star( m, Z=Z)
 
-    L = star.FUV * 4.0 * np.pi * star._R**2
-    L = L * u.erg / u.s
+#    L = star.FUV * 4.0 * np.pi * star._R**2
+#    L = L * u.erg / u.s
 
-    rsqr = ( xp - data['x'])**2 +\
-           ( yp - data['y'])**2 +\
-           ( zp - data['z'])**2
-    rsqr = rsqr.convert_to_units('cm**2')
+#    rsqr = ( xp - data['x'])**2 +\
+#           ( yp - data['y'])**2 +\
+#           ( zp - data['z'])**2
+#    rsqr = rsqr.convert_to_units('cm**2')
 
 
-    G = L / (4.0 * np.pi * rsqr) / 1.59E-3
-    G = G.value # should be unitless
+#    G = L / (4.0 * np.pi * rsqr) / 1.59E-3
+#    G = G.value # should be unitless
 
-    T = data['temperature'].value
-    n_e = data['El_number_density'].convert_to_units('cm**(-3)').value
+#    T = data['temperature'].value
+#    n_e = data['El_number_density'].convert_to_units('cm**(-3)').value
 
-    e = 4.92E-2 / ( 1.0 + 4.0E-3 * (G * T**(0.5) / n_e)**(0.73)) +\
-        3.7E-2 * (1.0E-4 * T)**(0.7) / (1.0 + 2.0E-4 * ((G * T**0.5)/n_e))
+#    e = 4.92E-2 / ( 1.0 + 4.0E-3 * (G * T**(0.5) / n_e)**(0.73)) +\
+#        3.7E-2 * (1.0E-4 * T)**(0.7) / (1.0 + 2.0E-4 * ((G * T**0.5)/n_e))
 
-    return e * data['temperature']/data['temperature'] # force dimensionless units
+#    return e * data['temperature']/data['temperature'] # force dimensionless units
 
-add_field(('gas','fuv_efficiency'), function =_FUV_heating_efficiency, units='dimensionless')
+#add_field(('gas','fuv_efficiency'), function =_FUV_heating_efficiency, units='dimensionless')
 
 def _Pe_heating_total_rate(field, data):
   gamma = (data[('gas','pe_heating_cgs')])
