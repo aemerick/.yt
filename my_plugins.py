@@ -108,6 +108,45 @@ def _metal_fraction(field, data):
   return fraction
 add_field(('gas','metal_fraction'), function = _metal_fraction, units='dimensionless')
 
+def _metal_mass(field, data):
+
+  try:
+      metal_dens = data[('enzo', 'Metal_Density')].value
+  except:
+      try:
+          metal_dens = data[('enzo', 'metallicity')].value
+      except:
+          metal_dens = data[('enzo', 'Metallicity')].value
+
+  metal_dens = metal_dens * data.ds.mass_unit / data.ds.length_unit**3
+  metal_dens = metal_dens.convert_to_cgs()
+
+  mass = metal_dens * data['cell_volume']
+  mass = mass.convert_to_units('Msun')
+
+  return mass
+add_field(('gas','metal_mass'), function = _metal_mass, units='Msun')
+
+def _metal_number_density(field, data):
+
+  try:
+      metal_dens = data[('enzo', 'Metal_Density')].value
+  except:
+      try:
+          metal_dens = data[('enzo', 'metallicity')].value
+      except:
+          metal_dens = data[('enzo', 'Metallicity')].value
+
+  metal_dens = metal_dens * data.ds.mass_unit / data.ds.length_unit**3
+  metal_dens = metal_dens.convert_to_cgs()
+
+  n = metal_dens / ( 16.0 * u.amu)
+  n = n.convert_to_cgs()
+
+  return n
+add_field(('gas','Metal_Number_Density'), function = _metal_number_density, units='cm**(-3)')
+
+
 
 def _C_Fraction(field, data):
   metal_dens = data[('enzo', 'C_Density')].value
@@ -167,6 +206,18 @@ def _N_Fraction(field, data):
 
   return fraction
 add_field(('gas','N_Fraction'), function = _N_Fraction, units='dimensionless')
+
+def _N_Number_Density(field, data):
+    metal_dens = data[('enzo', 'N_Density')].value
+    metal_dens = metal_dens * data.ds.mass_unit / data.ds.length_unit**3
+    metal_dens = metal_dens.convert_to_cgs()
+
+    n = metal_dens / (14.0067 * u.amu)
+    n = n.convert_to_cgs()
+
+    return n
+add_field(('gas','N_Number_Density'), function = _N_Number_Density, units='cm**(-3)')
+
 
 def _Mg_Fraction(field, data):
   metal_dens = data[('enzo', 'Mg_Density')].value
