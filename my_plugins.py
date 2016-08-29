@@ -66,16 +66,16 @@ add_field(('gas','pe_total_rate'), function=_Pe_heating_total_rate, units='erg/s
 
 
 def _Pe_heating(field, data):
-  gamma = data[('enzo','Pe_heating_rate')].value
+  gamma = data[('enzo','Pe_heating_rate')]
 
-#  gamma = gamma * data.ds.mass_unit / data.ds.length_unit**3 * data.ds.velocity_unit**2 / data.ds.time_unit
+  gamma = gamma * data.ds.mass_unit / data.ds.length_unit**3 * data.ds.velocity_unit**2 / data.ds.time_unit
 
- # gamma = gamma.convert_to_units('erg/s/cm**3')
+  gamma = gamma.convert_to_units('erg/s/cm**3')
     
+  return gamma
 
-  return gamma * u.erg / u.s / u.cm**3
+add_field(('enzo','Pe_heating_rate'), function = _Pe_heating, units='erg/s/cm**3', force_override=True)
 
-add_field(('gas','pe_heating_cgs'), function = _Pe_heating, units='erg/s/cm**3')
 
 # ---------------------------------------------------------------------------
 #
